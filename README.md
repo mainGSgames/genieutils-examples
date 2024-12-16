@@ -16,20 +16,20 @@ Examples using genieutils-py demonstrating how to create AoE2 mods in Python
 
 If you have a Python coding workspace that works for you, feel free to skip this. If you are newer though, getting this up and running correctly will be quite helpful. First you're going to want to download an IDE, in this case I recommend VSCode ([download here](https://code.visualstudio.com/download)). Then open the project directory, which should look something like this:
 
-![image of VSCode](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_open.png?raw=true)
+![image of VSCode](https://github.com/Krakenmeister/genieutils-examples/blob/main/readme_images/vscode_open.png?raw=true)
 
 The most valuable aspect of using VSCode is its ability to recognize the genieutils-py library. When you have it working it will auto-complete for you, highlight syntax for easy readability, and allow you to navigate and reference the genieutils library in a couple clicks. First, you need to install the Python extension. Navigate to the Extension tab and install Python, Python Debugger, Pylance, and Black Formatter.
 
-![image of extensions](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_extensions.png?raw=true)
+![image of extensions](https://github.com/Krakenmeister/genieutils-examples/blob/main/readme_images/vscode_extensions.png?raw=true)
 
 Then click on the top bar, "Show and Run Commands >", "Python: Select Interpreter", and then click on the recommended interpreter that should be located locally, i.e. `.\venv\Scripts\python.exe`. Once the intepreter is correctly linked, your code should color in all of the genieutils class objects. This means you can right click on these objects and go directly to their definition and source code to learn how they are put together. It will auto-complete objects with their properties and give errors when you have arranged them incorrectly.
 
-![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_interpreter_0.png?raw=true)
-![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_interpreter_1.png?raw=true)
-![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_interpreter_2.png?raw=true)
-![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_interpreter_3.png?raw=true)
-![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_interpreter_4.png?raw=true)
-![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_interpreter_5.png?raw=true)
+![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/readme_images/vscode_interpreter_0.png?raw=true)
+![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/readme_images/vscode_interpreter_1.png?raw=true)
+![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/readme_images/vscode_interpreter_2.png?raw=true)
+![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/readme_images/vscode_interpreter_3.png?raw=true)
+![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/readme_images/vscode_interpreter_4.png?raw=true)
+![image of python interpreter](https://github.com/Krakenmeister/genieutils-examples/blob/main/readme_images/vscode_interpreter_5.png?raw=true)
 
 On top of this, you can select the black formatter to auto-format your code on save. Top bar, "Show and Run Commands >", "Preferences: Open Settings (UI)". Then in the settings search for "format on save" and enable it. When you search "black-formatter" you can add extra arguments, like changing the formatted line length to 200 with `--line-length=200`.
 
