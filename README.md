@@ -18,4 +18,4 @@ If you have a Python coding workspace that works for you, feel free to skip this
 
 ![image of VSCode](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_open.png?raw=true)
 
-The most valuable aspect of using VSCode is its ability to recognize the genieutils-py library. When you have it working it will auto-complete for you, highlight syntax for easy readability, and allow you to navigate and reference the genieutils library in a couple clicks. First, you need to install the Python extension.
+The most valuable aspect of using VSCode is its ability to recognize the genieutils-py library. When you have it working it will auto-complete for you, highlight syntax for easy readability, and allow you to navigate and reference the genieutils library in a couple clicks. First, you need to install the Python extension. Navigate to the Extension tab, and install Python, Python Debugger, Pylance, and Black Formatter.
