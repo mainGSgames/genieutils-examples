@@ -11,3 +11,9 @@ Examples using genieutils-py demonstrating how to create AoE2 mods in Python
 5. Activate the virtual environment with the command `call venv/Scripts/activate` for Windows, or `source venv/bin/activate` in Linux environments. When activated, the prompter should have a little `(venv)` indicator before the printing the directory you are currently in. To exit the virtual environment you can run `deactivate`
 6. Install the genieutils-py library and any other dependencies. This can be accomplished with `python -m pip install -r requirements.txt`
 7. Try running the example suite with `python ./create_mod.py`. It should load the game data, parse it, run the example modifications, and save the new file to datfiles/empires2_x2_p1.dat. This has successfully run once you get the output "Process completed!" Note that the parsing might take a while and if your machine has too little memory your operating system might terminate it for taking too long and hogging RAM. However, once it completes once it will cache that information to make it faster on subsequent runs.
+
+## Coding Environment
+
+If you have a Python coding workspace that works for you, feel free to skip this. If you are newer though, getting this up and running correctly will be quite helpful. First you're going to want to download an IDE, in this case I recommend VSCode ([download here](https://code.visualstudio.com/download)). Then open the project directory, which should look something like this:
+
+![image of VSCode](https://github.com/Krakenmeister/genieutils-examples/blob/main/tutorial/vscode_open.png?raw=true)
