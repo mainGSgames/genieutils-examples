@@ -1,7 +1,7 @@
 import copy
 
 from genieutils.datfile import DatFile
-from genieutils.unit import AttackOrArmor, Unit, ResourceCost, ResourceStorage
+from genieutils.unit import AttackOrArmor, Unit, ResourceCost, ResourceStorage, Task
 from genieutils.effect import EffectCommand, Effect
 
 from constants import *
@@ -32,7 +32,7 @@ def change_movement_speed(df: DatFile):
     print("Making all villagers %d%% slower" % 50)
     for civ in df.civs:
         for unit in civ.units:
-            if unit.class_ == unit_classes.CIVILIAN:
+            if unit is not None and unit.class_ == unit_classes.CIVILIAN:
                 unit.speed *= 0.5
 
 
@@ -77,7 +77,7 @@ def change_attacks(df: DatFile):
     print("Give all cavalry archers 1 bonus damage vs. infantry")
     for civ in df.civs:
         for unit in civ.units:
-            if unit.class_ == unit_classes.CAVALRY_ARCHER:
+            if unit is not None and unit.class_ == unit_classes.CAVALRY_ARCHER:
                 has_infantry_bonus_damage = False
                 # Check if the unit already has bonus damage against infantry
                 for attack in unit.type_50.attacks:
@@ -101,7 +101,7 @@ def change_attacks(df: DatFile):
     # So for the infantry units that have no bonus vs. siege, we need to give them a default bonus vs. siege of 0
     for civ in df.civs:
         for unit in civ.units:
-            if unit.class_ == unit_classes.INFANTRY:
+            if unit is not None and unit.class_ == unit_classes.INFANTRY:
                 has_siege_bonus_damage = False
                 # Check if it has bonus vs. siege
                 for attack in unit.type_50.attacks:
@@ -132,7 +132,7 @@ def change_armors(df: DatFile):
         for unit in civ.units:
             # Don't forget to check for monks and monks with relics as those are two separate units with separate unit classes
             # Also warrior priests without relics are categorized as infantry as far as its unit.class_ is concerned
-            if unit.class_ == unit_classes.MONK or unit.class_ == unit_classes.MONK_WITH_RELIC or unit.base_id == units.WARRIOR_PRIEST:
+            if unit is not None and (unit.class_ == unit_classes.MONK or unit.class_ == unit_classes.MONK_WITH_RELIC or unit.base_id == units.WARRIOR_PRIEST):
                 # Remove all armors whose class is pierce
                 unit.type_50.armours = list(filter(lambda armor: armor.class_ != armor_classes.PIERCE, unit.type_50.armours))
                 unit.creatable.displayed_pierce_armor = 999
@@ -143,7 +143,7 @@ def change_armors(df: DatFile):
     # This means that any unit with attack type of 10 will do that full damage amount as bonus damage to villagers
     for civ in df.civs:
         for unit in civ.units:
-            if unit.class_ == unit_classes.CIVILIAN:
+            if unit is not None and unit.class_ == unit_classes.CIVILIAN:
                 new_bonus_weakness: AttackOrArmor = AttackOrArmor(10, 0)
                 unit.type_50.armours.append(new_bonus_weakness)
     # Now give war wagons a corresponding attack
@@ -180,7 +180,7 @@ def change_hero_mode(df: DatFile):
     # The full list of flags is available on the AoE2DE UGC Guide
     for civ in df.civs:
         for unit in civ.units:
-            if unit.class_ == unit_classes.MONK_WITH_RELIC:
+            if unit is not None and unit.class_ == unit_classes.MONK_WITH_RELIC:
                 unit.creatable.hero_mode = 6
 
 
@@ -194,8 +194,8 @@ def change_unit_costs(df: DatFile):
         civ.units[units.WAR_ELEPHANT].creatable.resource_costs = (gold_cost, empty_cost, headroom_cost)
         civ.units[units.ELITE_WAR_ELEPHANT].creatable.resource_costs = (gold_cost, empty_cost, headroom_cost)
         # Alternatively, use the helper method
-        civ.units[units.WAR_ELEPHANT].creatable.resource_costs = helpers.costs_array_to_unit_cost([0, 0, 0, 85])
-        civ.units[units.ELITE_WAR_ELEPHANT].creatable.resource_costs = helpers.costs_array_to_unit_cost([0, 0, 0, 85])
+        civ.units[units.WAR_ELEPHANT].creatable.resource_costs = helpers.costs_array_to_unit_cost([0, 0, 0, 85], False)
+        civ.units[units.ELITE_WAR_ELEPHANT].creatable.resource_costs = helpers.costs_array_to_unit_cost([0, 0, 0, 85], False)
 
 
 # Modify what resources are obtained by training a unit / building a building
@@ -207,7 +207,7 @@ def change_unit_storages(df: DatFile):
     empty_storage: ResourceStorage = ResourceStorage(-1, 0, 0)
     for civ in df.civs:
         for unit in civ.units:
-            if unit.class_ == unit_classes.CIVILIAN:
+            if unit is not None and unit.class_ == unit_classes.CIVILIAN:
                 unit.resource_storages = (population_headroom, current_population, total_units)
 
     print("Building a krepost gives you 1 gold")
@@ -250,7 +250,7 @@ def change_hp(df: DatFile):
     # First make all cavalry archers start with 1 HP
     for civ in df.civs:
         for unit in civ.units:
-            if unit.class_ == unit_classes.CAVALRY_ARCHER:
+            if unit is not None and unit.class_ == unit_classes.CAVALRY_ARCHER:
                 unit.hit_points = 1
     # Now we need to make all effects in the game unable to change this
     for effect in df.effects:

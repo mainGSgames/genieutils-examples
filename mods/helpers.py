@@ -1,7 +1,7 @@
 from genieutils.datfile import DatFile
 from genieutils.task import Task
 from genieutils.effect import Effect, EffectCommand
-from genieutils.tech import ResearchResourceCost
+from genieutils.tech import ResearchResourceCost, Tech
 from genieutils.unit import ResourceCost
 
 from constants import *
@@ -88,10 +88,36 @@ def costs_array_to_unit_cost(costs: tuple[int, int, int, int], isBuilding: bool)
     return tuple(resource_costs)
 
 
+def create_empty_tech() -> Tech:
+    empty_cost: ResearchResourceCost = ResearchResourceCost(-1, 0, 0)
+    return Tech(
+        required_techs=(-1, -1, -1, -1, -1, -1),
+        resource_costs=(empty_cost, empty_cost, empty_cost),
+        required_tech_count=0,
+        civ=-1,
+        full_tech_mode=0,
+        research_location=-1,
+        language_dll_name=0,
+        language_dll_description=0,
+        research_time=0,
+        effect_id=-1,
+        type=0,
+        icon_id=-1,
+        button_id=0,
+        language_dll_help=0,
+        language_dll_tech_tree=0,
+        hot_key=-1,
+        name="",
+        repeatable=1,
+    )
+
+
 # Copy the unit graphics from civilization onto another
 def copy_architecture(df: DatFile, copyFrom: int, copyTo: int):
     df.civs[copyTo].icon_set = df.civs[copyFrom].icon_set  # Holds no gameplay purpose but good for organization in AGE
     for unit_id in range(len(df.civs[copyFrom].units)):
+        if df.civs[copyFrom].units[unit_id] is None:
+            continue
         if (
             df.civs[copyFrom].units[unit_id].class_ == unit_classes.BUILDING
             or df.civs[copyFrom].units[unit_id].class_ == unit_classes.TOWER

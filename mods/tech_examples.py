@@ -10,6 +10,14 @@ from mods import helpers
 NAME = "tech_examples"
 
 
+def run_tech_examples(df: DatFile):
+    change_tech_name(df)
+    change_tech_costs(df)
+    change_tech_button_location(df)
+    change_tech_research_time(df)
+    change_tech_research_location(df)
+    change_tech_prerequisites(df)
+
 
 # Change a technology's name
 def change_tech_name(df: DatFile):
@@ -47,8 +55,6 @@ def change_tech_costs(df: DatFile):
     # you should also recalculate any discounts that might be affected
 
 
-
-
 # Change where the button to research shows up
 def change_tech_button_location(df: DatFile):
     # Button locations are arranged like so:
@@ -73,6 +79,46 @@ def change_tech_research_time(df: DatFile):
     for tech in df.techs:
         if tech.research_location == units.BARRACKS:
             tech.research_time *= 2
+
+
+# Alter which technologies are required before another technology is researchable
+def change_tech_prerequisites(df: DatFile):
+    print("Making halberdier available in Castle Age for all civs")
+    # The following two commands accomplish the same task, replacing the imperial age requirement with a castle age requirement
+    df.techs[techs.HALBERDIER].required_techs = (
+        techs.CASTLE_AGE,
+        techs.PIKEMAN,
+        956,
+        -1,
+        -1,
+        -1,
+    )  # This is more readable but somewhat hard-coded
+    df.techs[techs.HALBERDIER].required_techs = tuple(
+        map(
+            lambda prerequisite: (techs.CASTLE_AGE if prerequisite == techs.IMPERIAL_AGE else prerequisite),
+            df.techs[techs.HALBERDIER].required_techs,
+        )
+    )  # This is less readable but will adapt in case of other modifications
+
+    print("Making coinage available in Feudal Age for Franks")
+    # Because coinage has civilization = -1, anyone can research it, and any modification we make to it will apply to all civilizations equally
+    # In order to accomplish our task, we first must create a dummy prerequisite tech that Franks insantly research for free upon researching Feudal Age
+    coinage_prerequisite: Tech = helpers.create_empty_tech()  # This will default to no prerequisites, no cost, no research time, no research location
+    coinage_prerequisite.name = "Coinage prerequisite"  # change name for clarity
+    coinage_prerequisite.civ = civilizations.FRANKS
+    coinage_prerequisite.required_techs = (techs.FEUDAL_AGE, -1, -1, -1, -1, -1)
+    coinage_prerequisite.required_tech_count = 1
+
+    df.techs.append(coinage_prerequisite)  # Add the technology
+    coinage_prerequisite_tech_id = len(df.techs) - 1  # Save the new tech ID
+
+    # Now add the new prerequisite as a requirement to research coinage
+    df.techs[techs.COINAGE].required_techs = (techs.CASTLE_AGE, coinage_prerequisite_tech_id, -1, -1, -1, -1)
+    # You would think that ADDING a required technology would make it impossible for any other civ to research coinage
+    # But we are notably NOT increasing the required tech count, meaning that you still only need ONE of the required techs to satisfy your prerequisites
+    # That means that you need either Castle Age OR the dummy prerequisite in order to research coinage
+    # In other words every other civ remains unaffected (they will fulfill the requirements by reaching Castle Age) and Franks will be able to fulfill the requirements
+    # upon hitting Feudal Age
 
 
 # Move a technology to a different building
@@ -102,7 +148,7 @@ def change_tech_research_location(df: DatFile):
     tech_copy.effect_id = len(df.effects) - 1  # Make it so our new technology will apply the new effect
 
     df.techs.append(tech_copy)  # Add the copy to the datfile
-    wheelbarrow_copy_id = len(df.techs) = 1 # Save its tech ID
+    wheelbarrow_copy_id = len(df.techs) - 1  # Save its tech ID
 
     # Don't forget that the original wheelbarrow has to disable our new one as well
     disable_new_wheelbarrow_tech: EffectCommand = EffectCommand(102, -1, -1, -1, wheelbarrow_copy_id)
@@ -111,51 +157,3 @@ def change_tech_research_location(df: DatFile):
     # * We can also more simply accomplish this by having both technologies disable themselves and the other, because once the research is complete, disabling it won't
     # reverse its effects. This is a more niche solution though, and learning how technologies and effects interact is important. I encourage you to implement
     # this solution though as a test of your understanding! (hint: you do not need to create any Effects, just EffectCommands)
-
-
-# Alter which technologies are required before another technology is researchable
-def change_tech_prerequisites(df: DatFile):
-    print("Making halberdier available in Castle Age for all civs")
-    # The following two commands accomplish the same task, replacing the imperial age requirement with a castle age requirement
-    df.techs[techs.HALBERDIER].required_techs = (
-        techs.CASTLE_AGE,
-        techs.PIKEMAN,
-        956,
-        -1,
-        -1,
-        -1,
-    )  # This is more readable but somewhat hard-coded
-    df.techs[techs.HALBERDIER].required_techs = tuple(
-        map(
-            lambda prerequisite: (techs.CASTLE_AGE if prerequisite == techs.IMPERIAL_AGE else prerequisite),
-            df.techs[techs.HALBERDIER].required_techs,
-        )
-    )  # This is less readable but will adapt in case of other modifications
-
-    print("Making coinage available in Feudal Age for Franks")
-    # Because coinage has civilization = -1, anyone can research it, and any modification we make to it will apply to all civilizations equally
-    # In order to accomplish our task, we first must create a dummy prerequisite tech that Franks insantly research for free upon researching Feudal Age
-    coinage_prerequisite: Tech = Tech() # This will default to no prerequisites, no cost, no research time, no research location
-    coinage_prerequisite.name = "Coinage prerequisite" # change name for clarity
-    coinage_prerequisite.civ = civilizations.FRANKS
-    coinage_prerequisite.required_techs = (techs.FEUDAL_AGE, -1, -1, -1, -1, -1)
-    coinage_prerequisite.required_tech_count = 1
-
-    df.techs.append(coinage_prerequisite) # Add the technology
-    coinage_prerequisite_tech_id = len(df.techs) - 1 # Save the new tech ID
-
-    # Now add the new prerequisite as a requirement to research coinage
-    df.techs[techs.COINAGE].required_techs = (techs.CASTLE_AGE, coinage_prerequisite_tech_id, -1, -1, -1, -1)
-    # You would think that ADDING a required technology would make it impossible for any other civ to research coinage
-    # But we are notably NOT increasing the required tech count, meaning that you still only need ONE of the required techs to satisfy your prerequisites
-    # That means that you need either Castle Age OR the dummy prerequisite in order to research coinage
-    # In other words every other civ remains unaffected (they will fulfill the requirements by reaching Castle Age) and Franks will be able to fulfill the requirements
-    # upon hitting Feudal Age
-
-def run_tech_examples(df: DatFile):
-    change_tech_name(df)
-    change_tech_costs(df)
-    change_tech_button_location(df)
-    change_tech_research_time(df)
-    change_tech_research_location(df)
-    change_tech_prerequisites(df)
