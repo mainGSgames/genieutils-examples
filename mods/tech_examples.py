@@ -95,8 +95,8 @@ def change_tech_civ(df: DatFile):
 
     print("Taking away gold mining from everyone")
     # Setting civ value to 99 will work until we have 100 civilizations in the game o.O
-    df.techs[techs.GOLD_MINING] = 99
-    df.techs[techs.GOLD_SHAFT_MINING] = 99
+    df.techs[techs.GOLD_MINING].civ = 99
+    df.techs[techs.GOLD_SHAFT_MINING].civ = 99
 
     print("Letting khmer villagers one-shot wolves")
     # Since the civ value of a technology can only hold one value we have multiple methods of achieving this
