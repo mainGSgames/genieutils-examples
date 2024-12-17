@@ -39,6 +39,8 @@ Advanced Genie Editor (AGE) is the Graphical User Interface equivalent of genieu
 
 To open it, first locate your base game directory. It should be something along the lines of `C:\Program Files (x86)\Steam\steamapps\common\AoE2DE` (insert your Steam download directory). Then go to Tools_Builds folder and open AdvancedGenieEditor3.exe. Your base game .dat file will be located in `[your base directory]\resources\_common\dat\empires2_x2_p1.dat` and can be opened in AGE for inspection.
 
+For general information on game mechanics, the [AoE2DE UGC Guide](https://ugc.aoe2.rocks/) is an <b>excellent</b> resource. It clearly covers how damages are calculated, which effects are possible, and even goes further than what is possible with data modding.
+
 ## DatFile Structure and How They Work
 
 DatFiles can be broken down into the following tree:

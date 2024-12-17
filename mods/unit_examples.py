@@ -10,6 +10,19 @@ from mods import helpers
 NAME = "unit_examples"
 
 
+def run_unit_examples(df: DatFile):
+    change_movement_speed(df)
+    change_graphics(df)
+    change_unit_costs(df)
+    change_unit_storages(df)
+    change_attacks(df)
+    change_armors(df)
+    change_hero_mode(df)
+    change_charge_events(df)
+    change_hp(df)
+    change_train_location(df)
+
+
 # Change how fast units move
 def change_movement_speed(df: DatFile):
     print("Making missionaries super speed")
@@ -159,6 +172,18 @@ def change_charge_events(df: DatFile):
             civ.units[house_id].creatable.charge_type = 4
 
 
+# Give or take away certain characteristics associated with hero units
+def change_hero_mode(df: DatFile):
+    print("Make monks inconvertible and have regen when they pick up relics")
+    # A hero mode flag of 2 means they cannot be converted, a flag of 4 means they have regen
+    # In order to create something with both, simply add up these flags
+    # The full list of flags is available on the AoE2DE UGC Guide
+    for civ in df.civs:
+        for unit in civ.units:
+            if unit.class_ == unit_classes.MONK_WITH_RELIC:
+                unit.creatable.hero_mode = 6
+
+
 # Modify the costs required to train units
 def change_unit_costs(df: DatFile):
     print("Making war elephants cost no gold")
@@ -285,15 +310,3 @@ def change_train_location(df: DatFile):
                     duplicated_effect_command: EffectCommand = copy.deepcopy(effect_command)
                     duplicated_effect_command.a = new_missionary_id
                     effect.effect_commands.append(duplicated_effect_command)
-
-
-def run_unit_examples(df: DatFile):
-    change_movement_speed(df)
-    change_graphics(df)
-    change_unit_costs(df)
-    change_unit_storages(df)
-    change_attacks(df)
-    change_armors(df)
-    change_charge_events(df)
-    change_hp(df)
-    change_train_location(df)

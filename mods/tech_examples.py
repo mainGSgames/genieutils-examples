@@ -10,6 +10,7 @@ from mods import helpers
 NAME = "tech_examples"
 
 
+
 # Change a technology's name
 def change_tech_name(df: DatFile):
     # Changing the internal name of a technology will have no effect in-game
@@ -44,6 +45,8 @@ def change_tech_costs(df: DatFile):
 
     # Also note that technology discounts are calculated additively instead of multiplicatively and if you want to be precise with your technology cost changes
     # you should also recalculate any discounts that might be affected
+
+
 
 
 # Change where the button to research shows up
@@ -148,7 +151,6 @@ def change_tech_prerequisites(df: DatFile):
     # That means that you need either Castle Age OR the dummy prerequisite in order to research coinage
     # In other words every other civ remains unaffected (they will fulfill the requirements by reaching Castle Age) and Franks will be able to fulfill the requirements
     # upon hitting Feudal Age
-
 
 def run_tech_examples(df: DatFile):
     change_tech_name(df)
