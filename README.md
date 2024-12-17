@@ -1,6 +1,6 @@
 # Genieutils Examples
 
-Examples using genieutils-py demonstrating how to create AoE2 mods in Python
+Examples using genieutils-py demonstrating how to create AoE2 mods in Python. Created by Hszemi, [genieutils-py](https://github.com/SiegeEngineers/genieutils-py) is the Python adaptation of the original C++ [genieutils library](https://github.com/Tapsa/genieutils). More examples using the library can be found on the [auto-mods](https://github.com/SiegeEngineers/auto-mods) repo.
 
 ## Setup Instructions
 
