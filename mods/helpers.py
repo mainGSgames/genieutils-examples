@@ -9,6 +9,9 @@ from constants import *
 NAME = "helpers"
 
 
+# EffectCommands D value is always a float, meaning it can only hold one value
+# However, for EffectCommands that alter armors or attacks, one float must hold both the AttackOrArmor's class and amount
+# This helper function will convert an amount and attack/armor type into a float that can be used for a D value in an EffectCommand
 def amount_type_to_d(value: int, type: int) -> float:
     # Ensure the input is within the range of an 8-bit signed integer
     value = value & 0xFF  # Mask to 8 bits
@@ -88,6 +91,7 @@ def costs_array_to_unit_cost(costs: tuple[int, int, int, int], isBuilding: bool)
     return tuple(resource_costs)
 
 
+# Create a technology with default values -- no requirements, time to research, etc.
 def create_empty_tech() -> Tech:
     empty_cost: ResearchResourceCost = ResearchResourceCost(-1, 0, 0)
     return Tech(
@@ -112,7 +116,7 @@ def create_empty_tech() -> Tech:
     )
 
 
-# Copy the unit graphics from civilization onto another
+# Copy all regional unit and building graphics from one civilization onto another
 def copy_architecture(df: DatFile, copyFrom: int, copyTo: int):
     df.civs[copyTo].icon_set = df.civs[copyFrom].icon_set  # Holds no gameplay purpose but good for organization in AGE
     for unit_id in range(len(df.civs[copyFrom].units)):
