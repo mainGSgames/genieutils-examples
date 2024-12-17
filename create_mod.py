@@ -6,7 +6,7 @@ from pathlib import Path
 
 from genieutils.datfile import DatFile
 
-from mods import tech_examples
+from mods import tech_examples, unit_examples, custom_modifications
 
 
 # Overall, genieutils works by loading a .dat file into memory and constructing a DatFile object
@@ -25,6 +25,9 @@ def main():
     print("Base data loaded")
     print("Applying modifications")
     tech_examples.run_tech_examples(dfBase)
+    unit_examples.run_unit_examples(dfBase)
+    # Comment out / remove the previous two lines to run only your modifications
+    custom_modifications.run_custom_modifications(dfBase)
     print("Modifications completed")
 
     # You can save it as whatever filename.dat you want, but when it is in a mod you will need it to be named empires2_x2_p1.dat
