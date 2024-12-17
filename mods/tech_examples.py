@@ -15,6 +15,7 @@ def run_tech_examples(df: DatFile):
     change_tech_costs(df)
     change_tech_button_location(df)
     change_tech_research_time(df)
+    change_tech_civ(df)
     change_tech_research_location(df)
     change_tech_prerequisites(df)
 
@@ -79,6 +80,33 @@ def change_tech_research_time(df: DatFile):
     for tech in df.techs:
         if tech.research_location == units.BARRACKS:
             tech.research_time *= 2
+
+
+# Modify who can research a technology
+def change_tech_civ(df: DatFile):
+    print("Making gillnets only researchable by the Goths")
+    df.techs[techs.GILLNETS].civ = civilizations.GOTHS
+
+    print("Giving everyone start with a free horse")
+    # Civ value of -1 means anyone can research it
+    df.techs[238].civ = -1
+    df.techs[241].civ = -1
+    df.techs[242].civ = -1
+
+    print("Taking away gold mining from everyone")
+    # Setting civ value to 99 will work until we have 100 civilizations in the game o.O
+    df.techs[techs.GOLD_MINING] = 99
+    df.techs[techs.GOLD_SHAFT_MINING] = 99
+
+    print("Letting khmer villagers one-shot wolves")
+    # Since the civ value of a technology can only hold one value we have multiple methods of achieving this
+    # 1) We can create two identical technologies, one for each civ or
+    # 2) we can have one technology with civ value -1 and have every other civ disable it for themselves as if it were part of their tech tree
+    # We will go with the first option
+    tech_copy: Tech = copy.deepcopy(df.techs[69])  # Create a deep copy (so that changing the copy won't affect the original) of tech 69 which gives the one-shotting effect
+    tech_copy.civ = civilizations.KHMER  # Switch it to Khmer
+    tech_copy.name = "C-Bonus, one-shot animals for Khmer"  # Change name for clarity
+    df.techs.append(tech_copy)  # Add the technology to the DatFile
 
 
 # Alter which technologies are required before another technology is researchable
