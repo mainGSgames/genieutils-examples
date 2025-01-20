@@ -1,0 +1,109 @@
+import copy
+
+from genieutils.datfile import DatFile
+from genieutils.unit import Unit, ResourceCost, ResourceStorage, Task
+from constants import *
+from mods import helpers
+
+NAME = "age_diplomacy"
+
+def run_age_diplomacy(df: DatFile):
+    # Simple test modification that we know works from examples
+
+    RESEARCH_MULTIPLIER = 0.1
+    print("TEST: Making Feudal Age research in 5 seconds")
+    df.techs[techs.FEUDAL_AGE].research_time = int(df.techs[techs.FEUDAL_AGE].research_time * RESEARCH_MULTIPLIER)
+    df.techs[techs.CASTLE_AGE].research_time = int(df.techs[techs.CASTLE_AGE].research_time * RESEARCH_MULTIPLIER)
+    df.techs[techs.IMPERIAL_AGE].research_time = int(df.techs[techs.IMPERIAL_AGE].research_time * RESEARCH_MULTIPLIER)
+
+    disable_additional_town_centers(df)
+    scale_villager_training_time(df)
+    double_structure_health(df)       # Existing Function Call
+    double_structure_build_time(df)   # New Function Call
+
+def scale_villager_training_time(df: DatFile):
+    print("Making villagers take longer to train")
+    for civ in df.civs:
+        for unit in civ.units:
+            if unit is not None and unit.class_ == unit_classes.CIVILIAN:
+                if hasattr(unit, 'creatable') and unit.creatable is not None:
+                    # Increase train_time by +100% (example) 
+                    original_train_time = unit.creatable.train_time
+                    unit.creatable.train_time = int(original_train_time * 2)
+                    print(f"Unit ID {unit.id}: Train time increased from {original_train_time} to {unit.creatable.train_time}")
+
+def disable_additional_town_centers(df: DatFile):
+    print("You can only have one standing town_center at a time")
+    # In order to accomplish this, we need to create a new resource. Let's use resource ID 120 since that isn't used for anything else
+    # Give every civilization 1 of this resource at the start of the game
+    TOWN_CENTER_RESOURCE = 120
+    for civ in df.civs:
+        civ.resources[TOWN_CENTER_RESOURCE] = 1
+    # Now make every town_center cost 1 town_center_resource but do NOT deduct it as a cost, the resource storages will take care of the deductions
+    # This is so that if you don't have enough town_center_resource you won't be able to build another (otherwise you would just go negative town_center_resource without issue)
+    for civ in df.civs:
+        # Apply to all types of town centers, creating fresh copies of resource costs and storages for each
+        for tc_id in units.TOWN_CENTER_ALL:
+            tc_stone_cost = ResourceCost(resources.STONE, 123, 1)
+            tc_wood_cost = ResourceCost(resources.WOOD, 200, 1)
+            tc_resource_cost = ResourceCost(TOWN_CENTER_RESOURCE, 1, 0)  # Costs 1 but does not deduct when you start construction
+            civ.units[tc_id].creatable.resource_costs = (tc_stone_cost, tc_wood_cost, tc_resource_cost)
+
+            # Now, deduct the town_center_resource upon completion of the town_center, but give it back when the town_center is destroyed
+            tc_headroom_storage = ResourceStorage(resources.POPULATION_HEADROOM, 20, 4)
+            tc_resource_storage = ResourceStorage(TOWN_CENTER_RESOURCE, -1, 2)
+            empty_storage = ResourceStorage(-1, 0, 0)
+            civ.units[tc_id].resource_storages = (tc_headroom_storage, tc_resource_storage, empty_storage)
+
+def double_structure_health(df: DatFile):
+    print("Doubling health of Town Centers, Walls, and Houses")
+
+    # Define unit IDs for Town Centers and Houses
+    TOWN_CENTER_ALL = [
+        units.TOWN_CENTER, 71, 141, 142, 618, 619, 620, 621,
+        614, 615, 616, 617, 481, 482, 483, 484, 611, 612,
+        613, 597
+    ]
+
+    HOUSE_ALL = [units.HOUSE, 463, 464, 465, 191, 192]
+
+    WALL_CLASS = unit_classes.WALL  # 27
+
+    for civ in df.civs:
+        for unit in civ.units:
+            if unit is not None:
+                # Check if the unit is a Town Center, House, or Wall
+                if (unit.id in TOWN_CENTER_ALL) or (unit.id in HOUSE_ALL) or (unit.class_ == WALL_CLASS):
+                    original_hp = unit.hit_points
+                    if original_hp >= 0:
+                        unit.hit_points = original_hp * 10  # Double the health
+                        print(f"Unit ID {unit.id} ({unit.name}): HP increased from {original_hp} to {unit.hit_points}")
+                    else:
+                        print(f"Unit ID {unit.id} ({unit.name}): HP not modified (original HP: {original_hp})")
+
+def double_structure_build_time(df: DatFile):
+    print("Doubling build times of Town Centers, Walls, and Houses")
+
+    # Define unit IDs for Town Centers and Houses
+    TOWN_CENTER_ALL = [
+        units.TOWN_CENTER, 71, 141, 142, 618, 619, 620, 621,
+        614, 615, 616, 617, 481, 482, 483, 484, 611, 612,
+        613, 597
+    ]
+
+    HOUSE_ALL = [units.HOUSE, 463, 464, 465, 191, 192]
+
+    WALL_CLASS = unit_classes.WALL  # 27
+
+    for civ in df.civs:
+        for unit in civ.units:
+            if unit is not None:
+                # Check if the unit is a Town Center, House, or Wall
+                if (unit.id in TOWN_CENTER_ALL) or (unit.id in HOUSE_ALL) or (unit.class_ == WALL_CLASS):
+                    if hasattr(unit, 'creatable') and unit.creatable is not None:
+                        original_train_time = unit.creatable.train_time
+                        if original_train_time >= 0:
+                            unit.creatable.train_time = int(original_train_time * 20)  # Double the build time
+                            print(f"Unit ID {unit.id} ({unit.name}): Build time increased from {original_train_time} to {unit.creatable.train_time}")
+                        else:
+                            print(f"Unit ID {unit.id} ({unit.name}): Build time not modified (original Build Time: {original_train_time})")

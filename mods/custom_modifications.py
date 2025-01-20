@@ -11,6 +11,5 @@ from mods import helpers
 
 NAME = "custom_modifications"
 
-
 def run_custom_modifications(df: DatFile):
     print("Your code goes here:")
