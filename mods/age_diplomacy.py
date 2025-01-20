@@ -14,7 +14,7 @@ def run_age_diplomacy(df: DatFile):
     # 3. Make SPEARMAN and HALBERDIER train twice as fast
 
     # Adjust age-research times
-    RESEARCH_MULTIPLIER = 2
+    RESEARCH_MULTIPLIER = 1.2
     print("TEST: Making Age research take longer")
     df.techs[techs.FEUDAL_AGE].research_time = int(df.techs[techs.FEUDAL_AGE].research_time * RESEARCH_MULTIPLIER)
     df.techs[techs.CASTLE_AGE].research_time = int(df.techs[techs.CASTLE_AGE].research_time * RESEARCH_MULTIPLIER)
@@ -24,10 +24,11 @@ def run_age_diplomacy(df: DatFile):
     disable_additional_town_centers(df)
     slower_villager_training_time(df)
     slower_tradecart_training_time(df)
-    triple_building_health(df)       # Updated Function Call
-    double_building_build_time(df)   # Updated Function Call
-    accelerate_spearman_halberdier_train_time(df)  # New Function Call
-    disable_additional_markets(df)  # New Function Call
+    triple_building_health(df)       
+    double_building_build_time(df)   
+    accelerate_spearman_halberdier_train_time(df)  
+    disable_additional_markets(df) 
+    better_siege_towers(df)
 
 def slower_villager_training_time(df: DatFile):
     print("Making villagers take longer to train")
@@ -115,7 +116,12 @@ def triple_building_health(df: DatFile):
                 if original_hp >= 0:
                     
                     new_hp = original_hp
-                    if (unit in [units.CASTLE, units.TOWN_CENTER, units.DONJON, units.TOWN_CENTER_ALL] or unit.class_ == unit_classes.WALL):
+                    if (
+                        unit.id in [units.CASTLE, units.TOWN_CENTER, units.DONJON] 
+                        or unit.id in units.TOWN_CENTER_ALL
+                        or unit.class_ == unit_classes.WALL
+                        or unit.class_ == unit_classes.TOWER
+                    ):
                         new_hp = original_hp * 3
                     else:
                         new_hp = original_hp * 2
@@ -139,7 +145,18 @@ def double_building_build_time(df: DatFile):
                 if hasattr(unit, 'creatable') and unit.creatable is not None:
                     original_train_time = unit.creatable.train_time
                     if original_train_time >= 0:
-                        new_train_time = original_train_time * 2
+                        new_train_time = original_train_time 
+
+                        # slower build time for castles, donjons, walls, and towers to avoid forward castle cheese when castles are stronger
+                        if (
+                            unit.id in [units.CASTLE, units.DONJON] 
+                            or unit.class_ == unit_classes.WALL
+                            or unit.class_ == unit_classes.TOWER
+                        ):
+                            new_train_time = int(original_train_time * 2)
+                        else:
+                            new_train_time = int(original_train_time * 1.6)
+
                         if new_train_time > MAX_BUILD_TIME:
                             new_train_time = MAX_BUILD_TIME
                             print(f"Unit ID {unit.id} ({unit.name}): Build time doubled from {original_train_time} to {new_train_time} (capped to {MAX_BUILD_TIME})")
@@ -152,7 +169,7 @@ def double_building_build_time(df: DatFile):
 
 def accelerate_spearman_halberdier_train_time(df: DatFile):
     print("Doubling training speed for SPEARMAN and HALBERDIER")
-    target_units = [units.SPEARMAN, units.PIKEMAN, units.HEAVY_PIKEMAN, units.PIKEMAN_DONJON, units.SPEARMAN_DONJON, units.HALBERDIER, units.HALBERDIER_DONJON]
+    target_units = [units.SPEARMAN, units.PIKEMAN, units.HEAVY_PIKEMAN, units.PIKEMAN_DONJON, units.SPEARMAN_DONJON, units.HALBERDIER, units.HALBERDIER_DONJON, units.SKIRMISHER, units.ELITE_SKIRMISHER, units.IMPERIAL_SKIRMISHER]
     
     for civ in df.civs:
         for unit in civ.units:
@@ -167,3 +184,23 @@ def accelerate_spearman_halberdier_train_time(df: DatFile):
                         print(f"Unit ID {unit.id} ({unit.name}): Train time not modified (original Train Time: {original_train_time})")
 
 
+def better_siege_towers(df: DatFile):
+    print("Modifying Siege Towers to only cost 100 wood and have double hit points")
+    for civ in df.civs:
+        for unit in civ.units:
+            if unit is not None and unit.id == units.SIEGE_TOWER:
+                # Make siege towers slower
+                unit.speed = int(unit.speed * 0.5)
+                print(f"Siege Tower ID {units.SIEGE_TOWER}: speed halved from to {unit.speed}")
+                
+                # Ensure the unit has a 'creatable' attribute
+                if unit.creatable is not None:
+                    # Set resource costs to only 100 wood, others to 0
+                    unit.creatable.resource_costs = (
+                        ResourceCost(resources.GOLD, 50, 1),    # Stone cost set to 0
+                        ResourceCost(resources.WOOD, 200, 1),    # Wood cost set to 100
+                        ResourceCost(-1, 0, 0),                  # No third resource cost
+                    )
+                    print(f"Siege Tower ID {units.SIEGE_TOWER}: Resource costs set to 100 wood, 50 gold, 0 other resources")
+                else:
+                    print(f"Siege Tower ID {units.SIEGE_TOWER} has no creatable data; skipping resource cost modification")
