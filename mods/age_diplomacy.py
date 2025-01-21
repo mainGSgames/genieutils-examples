@@ -38,7 +38,7 @@ def slower_villager_training_time(df: DatFile):
                 if hasattr(unit, 'creatable') and unit.creatable is not None:
                     original_train_time = unit.creatable.train_time
                     if original_train_time >= 0:
-                        unit.creatable.train_time = int(original_train_time * 2)  # Double the training time
+                        unit.creatable.train_time = int(original_train_time * 1.2)  # Longer training time
                         print(f"Unit ID {unit.id}: Train time increased from {original_train_time} to {unit.creatable.train_time}")
                     else:
                         print(f"Unit ID {unit.id}: Train time not modified (original Train Time: {original_train_time})")
@@ -59,50 +59,76 @@ def slower_tradecart_training_time(df: DatFile):
 
 def disable_additional_town_centers(df: DatFile):
     print("You can only have one standing town_center at a time")
-    # In order to accomplish this, we need to create a new resource. Let's use resource ID 120 since that isn't used for anything else
-    # Give every civilization 1 of this resource at the start of the game
+
     TOWN_CENTER_RESOURCE = 120
-    for civ in df.civs:
+
+    # Skip civ 0 (GAIA). Start at civ 1 for actual playable civs.
+    for civ_index in range(1, len(df.civs)):
+        civ = df.civs[civ_index]
+
+        # Give them 1 'Town Center Resource' so they can build exactly 1
         civ.resources[TOWN_CENTER_RESOURCE] = 1
-    # Now make every town_center cost 1 town_center_resource but do NOT deduct it as a cost, the resource storages will take care of the deductions
-    # This is so that if you don't have enough town_center_resource you won't be able to build another (otherwise you would just go negative town_center_resource without issue)
-    for civ in df.civs:
-        # Apply to all types of town centers, creating fresh copies of resource costs and storages for each
+
+        # Overwrite the cost/storage on every variant of the Town Center
         for tc_id in units.TOWN_CENTER_ALL:
             tc_stone_cost = ResourceCost(resources.STONE, 100, 1)
             tc_wood_cost = ResourceCost(resources.WOOD, 200, 1)
-            tc_resource_cost = ResourceCost(TOWN_CENTER_RESOURCE, 1, 0)  # Costs 1 but does not deduct when you start construction
-            civ.units[tc_id].creatable.resource_costs = (tc_stone_cost, tc_wood_cost, tc_resource_cost)
+            tc_resource_cost = ResourceCost(TOWN_CENTER_RESOURCE, 1, 0)
+            civ.units[tc_id].creatable.resource_costs = (
+                tc_stone_cost,
+                tc_wood_cost,
+                tc_resource_cost
+            )
 
-            # Now, deduct the town_center_resource upon completion of the town_center, but give it back when the town_center is destroyed
-            tc_headroom_storage = ResourceStorage(resources.POPULATION_HEADROOM, 20, 4)
+            # Provide pop space to this player only
+            # Deduct TOWN_CENTER_RESOURCE upon completion
+            # Return TOWN_CENTER_RESOURCE on death
+            tc_headroom_storage = ResourceStorage(resources.POPULATION_HEADROOM, 5, 4)
             tc_resource_storage = ResourceStorage(TOWN_CENTER_RESOURCE, -1, 2)
             empty_storage = ResourceStorage(-1, 0, 0)
-            civ.units[tc_id].resource_storages = (tc_headroom_storage, tc_resource_storage, empty_storage)
+
+            civ.units[tc_id].resource_storages = (
+                tc_headroom_storage,
+                tc_resource_storage,
+                empty_storage,
+            )
+
 
 def disable_additional_markets(df: DatFile):
     print("You can only have one standing market at a time")
-    # Create a new resource for market limitation. Using resource ID 61 (unused).
     MARKET_RESOURCE = 61
-    
-    # Initialize the new resource for all civilizations with a value of 1.
-    for civ in df.civs:
-        civ.resources[MARKET_RESOURCE] = 1
-    
-    # Apply the resource cost and storage logic to all market types.
-    for civ in df.civs:
-        for market_id in units.MARKET_ALL:  # Assuming `MARKET_ALL` includes all market variations.
-            if hasattr(market_id, 'creatable') and market_id.creatable is not None:
-                market_stone_cost = ResourceCost(resources.STONE, 0, 1)
-                market_wood_cost = ResourceCost(resources.WOOD, 175, 1)
-                market_resource_cost = ResourceCost(MARKET_RESOURCE, 1, 0)  # Costs 1 but does not deduct when you start construction
-                civ.units[market_id].creatable.resource_costs = (market_stone_cost, market_wood_cost, market_resource_cost)
 
-                # Now, deduct the town_center_resource upon completion of the town_center, but give it back when the town_center is destroyed
-                market_headroom_storage = ResourceStorage(resources.POPULATION_HEADROOM, 20, 4)
+    # (Optionally skip civ 0 so that GAIA doesn't also get a "market resource")
+    for civ_index in range(1, len(df.civs)):
+        civ = df.civs[civ_index]
+
+        # Give each civ exactly 1 'MARKET_RESOURCE'
+        civ.resources[MARKET_RESOURCE] = 1
+
+        # For each Market variant, overwrite cost and storages
+        for market_id in units.MARKET_ALL:
+            market_unit = civ.units[market_id]
+            if market_unit is not None and market_unit.creatable is not None:
+                market_stone_cost = ResourceCost(resources.STONE, 0, 1)
+                market_wood_cost  = ResourceCost(resources.WOOD, 175, 1)
+                market_resource_cost = ResourceCost(MARKET_RESOURCE, 1, 0)
+
+                market_unit.creatable.resource_costs = (
+                    market_stone_cost,
+                    market_wood_cost,
+                    market_resource_cost,
+                )
+
+                # Deduct the MARKET_RESOURCE on completion, return it on destruction
+                market_headroom_storage = ResourceStorage(resources.POPULATION_HEADROOM, 0, 4)
                 market_resource_storage = ResourceStorage(MARKET_RESOURCE, -1, 2)
-                market_empty_storage = ResourceStorage(-1, 0, 0)
-                civ.units[market_id].resource_storages = (market_headroom_storage, market_resource_storage, market_empty_storage)
+                empty_storage           = ResourceStorage(-1, 0, 0)
+
+                market_unit.resource_storages = (
+                    market_headroom_storage,
+                    market_resource_storage,
+                    empty_storage,
+                )
 
 
 
